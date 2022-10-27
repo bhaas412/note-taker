@@ -44,6 +44,14 @@ const addNote = async (note) => {
     return await writeToFile('db/db.json', JSON.stringify(newNotes));
 }
 
+// This function removes a note from db.json and returns the new array of notes
+const removeNote = async (noteId) => {
+    const allNotes = await getAllNotes();
+    const newNotes = await allNotes.filter((note) => note.id !== noteId); // Iterate through all notes and only return ones that don't match the specified id
+
+    return await writeToFile('db/db.json', JSON.stringify(newNotes));
+}
+
 //#endregion
 
 // GET /api/notes should read the db.json file and return all saved notes to the client
@@ -61,6 +69,16 @@ router.post('/notes', async (req, res) => {
     const note = await addNote(req.body);
     try {
         return res.json(note);
+    } catch (e) {
+        return res.status(500).json(e);
+    }
+})
+
+// DELETE /api/notes/:id deletes the note with specified id in req.params
+router.delete('/notes/:id', async (req, res) => {
+    const allNotes = await removeNote(req.params.id);
+    try {
+        return res.json({ ok: true });
     } catch (e) {
         return res.status(500).json(e);
     }
